@@ -24,10 +24,16 @@ def Setup(): #this function make sure that the script is in the right directory
     else:
         return None
 
-def CreateMemory():
-    pass
+def CreateMemory(): #this function create a new memory
+    Dir = str(CWD() + "/" + Time.now() + "/")
+    Now = Time.now()
+    File = Now.date() + "-" + Now.hour + "-" + Now.minute + "-" + Now.second
 
-def SeeMemories():
+    with open(Dir + File + ".txt", "w+") as Memory:
+        print("Write what made you happy just now (check everything is right)")
+
+
+def SeeMemories(Random = True, All = False): # function allow to see (all) memories
     pass
 
 def Main(): #main function
@@ -38,18 +44,22 @@ def Main(): #main function
     Menu = \
         {
             "Create a new positive memory" : "CreateMemory()",
-            "See all the positive memories for this year (random order)" : "SeeMemories('Random')",
-            "See all the positive memories for this year (chronological order)" : "SeeMemories('Ordered')",
-            "See all the positive memories of all year (random order)" : "SeeMemories('Random', 'All')",
-            "See all the positive memories of all year (chronological order)" :  "SeeMemories('Ordered', 'All')"
+            "See all the positive memories for this year (random order)" : "SeeMemories()",
+            "See all the positive memories for this year (chronological order)" : "SeeMemories(False)",
+            "See all the positive memories of all year (random order)" : "SeeMemories(True, True)",
+            "See all the positive memories of all year (chronological order)" :  "SeeMemories(False, True)"
         } #menu options
 
     print(Welcome)
 
-    for Option in Menu: #for loop  for every option
-        print(str(Menu.index(Option) + 1) + ")", Option)
+    for Key in Menu.keys(): #for loop  for every option
+        print(str(list(Menu.keys()).index(Key) + 1) + ")", Key)
 
+    Answer = - 1
+    while not 1 <= Answer <= len(Menu.keys()):
+        Answer = int(input("type the number matched with the option you want to select: "))
 
+    eval(list(Menu.values())[Answer - 1])
 
 if __name__ == "__main__":
     Main()
