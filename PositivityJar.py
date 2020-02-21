@@ -8,28 +8,30 @@ from os.path import realpath as Path
 from random import shuffle as Mix
 from tkinter import Tk as Tk
 
-def Setup(): #this function make sure that the script is in the right directory
-    DirName = "PositivityJar" #name of the directory of the program
-    if not str(Path(__file__)).endswith(DirName + "/" + __file__): #check if the file is in the directory
-        try:
-            Move(Path(__file__), Path(__file__)[: - len(__file__)] + DirName + "/" + __file__) #try to create the folder
-
-        except Exception as Error: #if the folder is not created
-            print(Error) #print the exception error
-            print("Try opening the program in another directory with a lower access level") #solution
-
-    else:
-        return None
+# def Setup(): #this function make sure that the script is in the right directory
+#     DirName = "PositivityJar" #name of the directory of the program
+#     if not str(Path(__file__)).endswith(DirName + "/" + __file__): #check if the file is in the directory
+#         try:
+#             Move(Path(__file__), Path(__file__)[:-len(__file__)] + DirName + "/" + __file__) #try to create the folder
+#
+#         except Exception as Error: #if the folder is not created
+#             print(Error) #print the exception error
+#             print("Try opening the program in another directory with a lower access level") #solution
+#
+#     else:
+#         return None
 
 def YearFolder():
-    Year = str(CWD()) + "/" + str(Time.now().year)
+    Year = str(CWD()) + "/" + str(Time.now().year) + " Memories"
     if not IsDir(Year):
-        CreateDir(str(Time.now().year + " Memories"))
+        CreateDir(str(str(Time.now().year) + " Memories"))
+
 
 def CreateMemory(): #this function create a new memory
-    Dir = str(CWD() + "/" + Time.now().year + " Memories" + "/")  # year directory
+    Dir = str(CWD() + "/" + str(Time.now().year) + " Memories" + "/")  # year directory
     Now = Time.now() #memory time tamp
-    File = Now.date() + "-" + Now.hour + "-" + Now.minute + "-" + Now.second #format file name correctly
+    DateTime = str(Now.hour) + "-" + str(Now.minute) + "-" + str(Now.second)
+    File = str(Now.date()) + "-" + DateTime #format file name correctly
 
     with open(Dir + File + ".txt", "w+") as Memory: #file writing of the memory
         print("Write what made you happy just now (check everything is right)")
@@ -42,10 +44,10 @@ def CreateMemory(): #this function create a new memory
                 break
 
         Memory.write(Text) #memory writing
-        Memory.write(str(Now.date())) #date writing
+        Memory.write("\n" + str(Now.date())) #date writing
 
 def SeeMemories(Random = True, All = False): # function allow to see (all) memories
-    Dir = str(CWD() + "/" + Time.now().year + " Memories")  # year directory
+    Dir = str(CWD() + "/" + str(Time.now().year) + " Memories")  # year directory
 
     if len(ListDir(Dir)) == 0:
         Dir = str(CWD() + "/" + int(Time.now().year - 1) + " Memories")  # year directory fixed
@@ -70,8 +72,12 @@ def SeeMemories(Random = True, All = False): # function allow to see (all) memor
     if Random: #shuffle the memory order if the user want to
         Mix(Memories) #mix the memory
 
+    for Memory in Memories:
+        print(Memory)
+        print()
+
 def Main(): #main function
-    Setup() #setup the environment
+    #Setup() #setup the environment
     YearFolder() #check if the folder of the year exist either create it
     Title = "Positivity.Jar" #program title
     Welcome = "Welcome to Positivity.Jar, a place to store everything that make you happy during the year" #description
