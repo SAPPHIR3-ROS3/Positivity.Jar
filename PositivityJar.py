@@ -13,6 +13,7 @@ from string import ascii_uppercase as Alphabet
 from tkinter import Tk as Tk
 
 #start non sql implementation
+
 def YearFolder():
     Year = str(CWD()) + "/" + str(Time.now().year) + " Memories"
     if not IsDir(Year):
@@ -63,14 +64,17 @@ def SeeMemories(Random = True, All = False): # function allow to see (all) memor
     if Random: #shuffle the memory order if the user want to
         Mix(Memories) #mix the memory
 
-    for Memory in Memories:
+    for Memory in Memories: #loop to print all memories
         print(Memory)
         print()
+
 #end non sql implementation
 
 #start sql implementation
+
 Connector = Connect(":memory:", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
+SQLTables = "SELECT name FROM sqlite_master WHERE type = 'table'"
 
 def CheckText(SQLQueryText = str()): #this function check if the query has any problem
     return SQLQueryText
@@ -78,8 +82,7 @@ def CheckText(SQLQueryText = str()): #this function check if the query has any p
 def YearTable(): #this function declares a table of the current year inside  the database if non-existent
     with Connector: #database as  context manager
         Table = str(Time.now().year) + "Memories" #table name
-        DataBase = SQLShell("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall() #query for tables names
-        DataBase = [str(Tab)[2 : 3] for Tab in DataBase] #name fixing inside the list
+        DataBase = [str(Tab[0]) for Tab in SQLShell(SQLTables).fetchall()] #getting names of al tables
         if not Table in DataBase: #if the table is in the list
             SQLShell.execute\
                 (
@@ -117,6 +120,31 @@ def InsertMemory(): #this function create a new memory inside the table of the c
 
     except Exception as Error:
         print(Error)
+
+def ShowMemories(Random = True, All = False):
+    YearsQuery = SQLTables + " AND name LIKE %Memories" #SQLQuery to find the name of all tables of memories
+    Memories = [] #list of all selected memories
+    Years = [str(Tab[0]) for Tab in SQLShell.execute().fetchall(YearsQuery)] #list of names of the tables of memories
+
+    with Connector:
+        if All:
+            for Year in Years:
+                MemoryQuery = "SELECT Memory, Date FROM " + Year #query for memories of the current year
+                YearMemories = SQLShell.execute(MemoryQuery).fetchall() #getting all memories from the current year
+                YearMemories = [[Data[0], Data[1]] for Data in YearMemories] #formatting properly the data
+                Memories.extend(YearMemories) #proper extension of the list of all memories
+        else:
+            MemoryQuery = "SELECT Memory, Date FROM " + Years[-1] #query for memories of the last registered year
+            YearMemories = SQLShell.execute(MemoryQuery).fetchall() #getting all memories from the selected year
+            Memories = [[Data[0], Data[1]] for Data in YearMemories] #formatting properly the data
+
+    if Random:  #shuffle the memory order if the user want to
+        Mix(Memories)  #mix the memories
+
+    for Memory in Memories:#loop to print all memories
+        print(Memory[0])
+        print(Memory[1])
+        print()
 
 #end sql implementation
 
