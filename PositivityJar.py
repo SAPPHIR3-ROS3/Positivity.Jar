@@ -76,9 +76,6 @@ Connector = Connect(":memory:", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
 SQLTables = "SELECT name FROM sqlite_master WHERE type = 'table'"
 
-def CheckText(SQLQueryText = str()): #this function check if the query has any problem
-    return SQLQueryText
-
 def YearTable(): #this function declares a table of the current year inside  the database if non-existent
     with Connector: #database as  context manager
         Table = str(Time.now().year) + "Memories" #table name
@@ -114,9 +111,9 @@ def InsertMemory(): #this function create a new memory inside the table of the c
 
     try:
         with Connector: #database as context manger
-            SQLQuery = "INSERT INTO " + str(Now.year) + "Memories " + "VALUES(" # SQL command to insert a new record
-            SQLQuery += MemoryID + "," + CheckText(Text) + "," + Now + "," + Today + ")" #values of the record
-            SQLShell.execute(SQLQuery) #execute the sql query inserting the data of the record correctly
+            SQLQuery = "INSERT INTO " + str(Now.year) + "Memories " + "VALUES(:MemID, :Text, :Now, :Date)"
+            Values = {"MemID" : MemoryID, "Text" : Text, "Now" : Now, "Date" : Today} #values safely inserted
+            SQLShell.execute(SQLQuery, Values) #execute the sql query correctly
 
     except Exception as Error:
         print(Error)
