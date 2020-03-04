@@ -137,7 +137,7 @@ def Main(): #main function
 
 ##start sql implementation
 
-Connector = Connect(":memory:", detect_types = TimeStamps)
+Connector = Connect("Memories.db", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
 SQLTables = "SELECT name FROM sqlite_master WHERE type = 'table'"
 
