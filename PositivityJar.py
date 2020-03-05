@@ -164,13 +164,15 @@ def InsertMemory(): #this function create a new memory inside the table of the c
     MemoryID = str(Now) + str("".join(Picks(Alphabet, k = 6)))
     TableName = "My" + str(Now.year) + "Memories"
 
-    print("Write what made you happy just now (check everything is right)")
-
     while True:  # loop for confirmation of the memory
+        print("Write what made you happy just now (check everything is right)")
         Text = input()  # memory
 
-        if input("Are you sure, it's everything correct? <y> ")[0].lower() == "y":  # confirmation check
+        if input("Are you sure, it's everything correct? <y/n> ")[0].lower() == "y":  # confirmation check
             break
+
+        elif input("Are you sure, it's everything correct? <y/n> ")[0].lower() == "n":
+            Clear()
 
     try:
         with Connector: #database as context manger
