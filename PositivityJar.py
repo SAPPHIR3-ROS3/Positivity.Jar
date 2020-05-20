@@ -1,10 +1,4 @@
 from datetime import datetime as Time
-from os import getcwd as CWD
-from os import listdir as ListDir
-from os import mkdir as CreateDir
-#from os import replace as Move
-from os.path import isdir as IsDir
-#from os.path import realpath as Path
 from random import shuffle as Mix
 from os import system as Sys
 from os import name as Name
@@ -12,8 +6,101 @@ from random import choices as Picks
 from sqlite3 import connect as Connect
 from sqlite3 import PARSE_DECLTYPES as TimeStamps
 from string import ascii_uppercase as Alphabet
+from tkinter import Button as Button
+from tkinter import Frame as Frame
+from tkinter import Label as Label
+from tkinter import messagebox as MSGBox
+from tkinter import PhotoImage as Photo
+from tkinter import Text as TextBox
 from tkinter import Tk as Tk
 
+def TKinterSetup():
+    Root = Tk() #ambient
+    HRel = 0.5 #relative max size halved
+    WIDTH = 400  #window width
+    HEIGHT = 720 #window height
+    Dim = str(str(WIDTH) + 'x' + str(HEIGHT)) #string of sizes
+    Title = 'Positivity.Jar'
+    Icon = Photo(file='textures\icon.png') #program icon
+    Root.iconphoto(True, Icon) #setting the icon
+    Root.title(Title) #setting the title
+    Root.geometry(Dim) #setting dimensions
+
+    #menu
+
+    MenuFrame = Frame(Root) #menu window area
+    MenuFrame.place(relx=0, rely=0, relwidth=1, relheight=1)  #placing the menu frame in the window
+
+    MenuTopLabel = Label(MenuFrame, text = 'Welcome to\nPositivity.Jar', font = ('Courier', 32), bd = 10) #welcome label
+    MenuTopLabel.place(anchor = 'n', relx = HRel, rely = 0.015, relwidth = 1, relheight = 0.2) #placing the label
+
+    Menu =\
+        [
+            Button
+            (
+                MenuFrame,
+                text = 'Create new memory',
+                font = ('Courier', 20),
+                command = lambda : InputFrame.tkraise() #raising a top level the input frame
+            ),
+            Button
+            (
+                MenuFrame,
+                text = 'Show all memories of this year\n(random order)',
+                font = ('Courier', 14),
+                command = lambda : ShowMemories() #TODO
+            ),
+            Button
+            (
+                MenuFrame,
+                text = 'Show all memories of this year\n(chronological order)',
+                font=('Courier', 14),
+                command = lambda : ShowMemories(False) #TODO
+            ),
+            Button
+            (
+                MenuFrame,
+                text = "See all the memories of all year\n(random order)",
+                font=('Courier', 14),
+                command = lambda : ShowMemories(True, True) #TODO
+            ),
+            Button
+            (
+                MenuFrame,
+                text = "See all the memories of all year\n(chronological order)",
+                font = ('Courier', 14),
+                command = lambda: ShowMemories(False, True) #TODO
+            )
+        ] #list of buttons of the menu
+
+    for i in range(len(Menu)): #loop to place every button
+        Menu[i].place\
+            (
+                anchor = 'n', #anchored at nord
+                relx = HRel, #centered
+                rely = 0.25 + (i * 0.125), #y position
+                relwidth = 0.9 #% of window width
+            )# placing the button
+
+    #input
+
+    InputFrame = Frame(Root) # memory insertion frame
+    InputFrame.place(relx=0, rely=0, relwidth=1, relheight=1) #placing the input frame
+
+    InputLabel = Label(InputFrame, text = 'Memory:', font = ('Courier', 24)) #top label of input frame
+    InputLabel.place(anchor='n', relx=HRel, relwidth=1, relheight=0.1) #placing the top label
+
+    MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
+    MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.1, relwidth = 0.98, relheight = 0.8) #placing the textbox
+
+    #Confirm = MSGBox.askquestion('Are you sure everything is correct?') #TODO continue from here
+    Submit = Button(text = 'Create Memory', font = ('Courier', 20), command = lambda : MenuFrame.tkraise())
+    Submit.place(anchor = 'n', relx = HRel, rely = 0.9135, relwidth = 0.9)
+    
+
+    MenuFrame.tkraise()
+
+    return Root
 
 def Clear(): #this function clear the console
     if Name == 'nt': #check if it's a windows system
@@ -159,4 +246,5 @@ def MainSQL():
 ##end sql implementation
 
 if __name__ == "__main__": #launch of the program (directly)
-    MainSQL()
+    ROOT = TKinterSetup()
+    ROOT.mainloop()
