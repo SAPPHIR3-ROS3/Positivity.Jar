@@ -14,17 +14,47 @@ from tkinter import PhotoImage as Photo
 from tkinter import Text as TextBox
 from tkinter import Tk as Tk
 
+def Clear(): #this function clear the console
+    if Name == 'nt': #check if it's a windows system
+        _ = Sys('cls')
+
+    else: #is a unix based system
+        _ = Sys('clear')
+
+## Start GUI implementation
+
+def Confirmation(Function , *args , Text = str(), Other = None, **aargs): #this function pops up a message for 2 actions
+    Confirm = MSGBox.askquestion('Confirmation', Text) #messagebox yes/no
+
+    if Confirm == 'yes': #positive answer
+        Function(*args)
+
+    else: #negative answer
+        try:
+            Other(**aargs)
+
+        except Exception as Error:
+            print(Error)
+
+def Raise(Screen): #this function raise the selected frame to the top
+    Screen.tkraise()
+
 def TKinterSetup():
     Root = Tk() #ambient
     HRel = 0.5 #relative max size halved
     WIDTH = 400  #window width
     HEIGHT = 720 #window height
+    SWIDTH = Root.winfo_screenwidth() #screen width
+    SHEIGHT = Root.winfo_screenheight() #screen height
+    X = (SWIDTH - WIDTH) / 2
+    Y = (SHEIGHT - HEIGHT) / 2
     Dim = str(str(WIDTH) + 'x' + str(HEIGHT)) #string of sizes
+    Pos = str('+' + str(int(X)) + '+' + str(int(Y)))
     Title = 'Positivity.Jar'
-    Icon = Photo(file='textures\icon.png') #program icon
-    Root.iconphoto(True, Icon) #setting the icon
+    # Icon = Photo(file='textures\icon.png') #program icon
+    # Root.iconphoto(True, Icon) #setting the icon
     Root.title(Title) #setting the title
-    Root.geometry(Dim) #setting dimensions
+    Root.geometry(Dim + Pos) #setting dimensions
 
     #menu
 
@@ -41,7 +71,7 @@ def TKinterSetup():
                 MenuFrame,
                 text = 'Create new memory',
                 font = ('Courier', 20),
-                command = lambda : InputFrame.tkraise() #raising a top level the input frame
+                command = lambda : Raise(InputFrame) #raising a top level the input frame
             ),
             Button
             (
@@ -90,26 +120,32 @@ def TKinterSetup():
     InputLabel = Label(InputFrame, text = 'Memory:', font = ('Courier', 24)) #top label of input frame
     InputLabel.place(anchor='n', relx=HRel, relwidth=1, relheight=0.1) #placing the top label
 
-    MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
-    MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.1, relwidth = 0.98, relheight = 0.8) #placing the textbox
+    WarningLabel = Label\
+        (
+            InputFrame,
+            text = 'attention:\ninserted memories can no longer be modified',
+            font = ('Courier', 10),
+            fg = '#ff0000'
+        )
+    WarningLabel.place(anchor='n', relx=HRel, rely = 0.09, relwidth=1, relheight=0.04)
 
-    #Confirm = MSGBox.askquestion('Are you sure everything is correct?') #TODO continue from here
-    Submit = Button(text = 'Create Memory', font = ('Courier', 20), command = lambda : MenuFrame.tkraise())
+    MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
+    MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.15, relwidth = 0.98, relheight = 0.75) #placing the textbox
+
+    Submit = Button\
+        (
+            InputFrame,
+            text = 'Create Memory',
+            font = ('Courier', 20),
+            command = lambda : Confirmation(InsertMemory, MemoryInput.get(1.0))
+        )
     Submit.place(anchor = 'n', relx = HRel, rely = 0.9135, relwidth = 0.9)
-    
 
     MenuFrame.tkraise()
 
     return Root
 
-def Clear(): #this function clear the console
-    if Name == 'nt': #check if it's a windows system
-        _ = Sys('cls')
-
-    else: #is a unix based system
-        _ = Sys('clear')
-
-##start sql implementation
+## Start sql implementation
 
 Connector = Connect("Memories.db", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
@@ -132,28 +168,19 @@ def YearTable(): #this function declares a table of the current year inside  the
                     """
             SQLShell.execute(SQLQueryTable) #SQL command to create the table
 
-def InsertMemory(): #this function create a new memory inside the table of the current year
+def InsertMemory(Text = str()): #this function create a new memory inside the table of the current year
     Now = Time.now() #timestamps
     Today = Now.date() #date
     MemoryID = str(Now) + str("".join(Picks(Alphabet, k = 6)))
     TableName = "My" + str(Now.year) + "Memories"
 
-    while True:  # loop for confirmation of the memory
-        print("Write what made you happy just now (check everything is right)")
-        Text = input()  # memory
-
-        if input("Are you sure, it's everything correct? <y/n> ")[0].lower() == "y":  # confirmation check
-            break
-
-        elif input("Are you sure, it's everything correct? <y/n> ")[0].lower() == "n":
-            Clear()
-
     try:
-        with Connector: #database as context manger
-            SQLQuery = "INSERT INTO " + TableName + " VALUES(:MemID, :Text, :Now, :Date)"
-            Values = {"MemID" : MemoryID, "Text" : Text, "Now" : Now, "Date" : Today} #values safely inserted
-            SQLShell.execute(SQLQuery, Values) #execute the sql query correctly
-            print("Memory inserted in the database")
+        if not Text == '':
+            with Connector: #database as context manger
+                SQLQuery = "INSERT INTO " + TableName + " VALUES(:MemID, :Text, :Now, :Date)"
+                Values = {"MemID" : MemoryID, "Text" : Text, "Now" : Now, "Date" : Today} #values safely inserted
+                SQLShell.execute(SQLQuery, Values) #execute the sql query correctly
+                print("Memory inserted in the database")
 
     except Exception as Error:
         print(Error)
