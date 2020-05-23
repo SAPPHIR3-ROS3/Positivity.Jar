@@ -51,8 +51,8 @@ def TKinterSetup():
     Dim = str(str(WIDTH) + 'x' + str(HEIGHT)) #string of sizes
     Pos = str('+' + str(int(X)) + '+' + str(int(Y)))
     Title = 'Positivity.Jar'
-    # Icon = Photo(file='textures\icon.png') #program icon
-    # Root.iconphoto(True, Icon) #setting the icon
+    Icon = Photo(file='textures\icon.png') #program icon
+    Root.iconphoto(True, Icon) #setting the icon
     Root.title(Title) #setting the title
     Root.geometry(Dim + Pos) #setting dimensions
 
@@ -130,7 +130,7 @@ def TKinterSetup():
     WarningLabel.place(anchor='n', relx=HRel, rely = 0.09, relwidth=1, relheight=0.04)
 
     MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
-    MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.15, relwidth = 0.98, relheight = 0.75) #placing the textbox
+    MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.15, relwidth = 0.98, relheight = 0.7) #placing the textbox
 
     Submit = Button\
         (
@@ -139,7 +139,10 @@ def TKinterSetup():
             font = ('Courier', 20),
             command = lambda : Confirmation(InsertMemory, MemoryInput.get(1.0))
         )
-    Submit.place(anchor = 'n', relx = HRel, rely = 0.9135, relwidth = 0.9)
+    Submit.place(anchor = 'n', relx = HRel, rely = 0.8635, relwidth = 0.9)
+
+    Back = Button(InputFrame, text = 'Back to menu', font = ('Courier', 10), command = lambda : Raise(MenuFrame))
+    Back.place(anchor = 'n', relx = HRel, rely = 0.945, relwidth = 0.9)
 
     MenuFrame.tkraise()
 
