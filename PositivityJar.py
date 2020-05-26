@@ -7,10 +7,12 @@ from sqlite3 import connect as Connect
 from sqlite3 import PARSE_DECLTYPES as TimeStamps
 from string import ascii_uppercase as Alphabet
 from tkinter import Button as Button
+from tkinter import Canvas as Canvas
 from tkinter import Frame as Frame
 from tkinter import Label as Label
 from tkinter import messagebox as MSGBox
 from tkinter import PhotoImage as Photo
+from tkinter import Scrollbar as Bar
 from tkinter import Text as TextBox
 from tkinter import Tk as Tk
 
@@ -56,13 +58,19 @@ def TKinterSetup():
     Root.title(Title) #setting the title
     Root.geometry(Dim + Pos) #setting dimensions
 
-    #menu
+    ################################################################################################################menu
 
     MenuFrame = Frame(Root) #menu window area
-    MenuFrame.place(relx=0, rely=0, relwidth=1, relheight=1)  #placing the menu frame in the window
+    MenuFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 1)  #placing the menu frame in the window
 
     MenuTopLabel = Label(MenuFrame, text = 'Welcome to\nPositivity.Jar', font = ('Courier', 32), bd = 10) #welcome label
     MenuTopLabel.place(anchor = 'n', relx = HRel, rely = 0.015, relwidth = 1, relheight = 0.2) #placing the label
+
+    Sel = 0
+
+    def ButtonSelection(Selection = int()):
+        nonlocal Sel
+        Sel = Selection
 
     Menu =\
         [
@@ -78,28 +86,28 @@ def TKinterSetup():
                 MenuFrame,
                 text = 'Show all memories of this year\n(random order)',
                 font = ('Courier', 14),
-                command = lambda : ShowMemories() #TODO
+                command = lambda : [Raise(ViewFrame), ButtonSelection(0)]
             ),
             Button
             (
                 MenuFrame,
                 text = 'Show all memories of this year\n(chronological order)',
                 font=('Courier', 14),
-                command = lambda : ShowMemories(False) #TODO
+                command = lambda : [Raise(ViewFrame), ButtonSelection(1)]
             ),
             Button
             (
                 MenuFrame,
                 text = "See all the memories of all year\n(random order)",
                 font=('Courier', 14),
-                command = lambda : ShowMemories(True, True) #TODO
+                command = lambda : [Raise(ViewFrame), ButtonSelection(2)]
             ),
             Button
             (
                 MenuFrame,
                 text = "See all the memories of all year\n(chronological order)",
                 font = ('Courier', 14),
-                command = lambda: ShowMemories(False, True) #TODO
+                command = lambda: [Raise(ViewFrame), ButtonSelection(3)]
             )
         ] #list of buttons of the menu
 
@@ -112,13 +120,13 @@ def TKinterSetup():
                 relwidth = 0.9 #% of window width
             )# placing the button
 
-    #input
+    ###############################################################################################################input
 
     InputFrame = Frame(Root) # memory insertion frame
-    InputFrame.place(relx=0, rely=0, relwidth=1, relheight=1) #placing the input frame
+    InputFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 1) #placing the input frame
 
     InputLabel = Label(InputFrame, text = 'Memory:', font = ('Courier', 24)) #top label of input frame
-    InputLabel.place(anchor='n', relx=HRel, relwidth=1, relheight=0.1) #placing the top label
+    InputLabel.place(anchor = 'n', relx = HRel, relwidth = 1, relheight = 0.1) #placing the top label
 
     WarningLabel = Label\
         (
@@ -126,8 +134,8 @@ def TKinterSetup():
             text = 'attention:\ninserted memories can no longer be modified',
             font = ('Courier', 10),
             fg = '#ff0000'
-        )
-    WarningLabel.place(anchor='n', relx=HRel, rely = 0.09, relwidth=1, relheight=0.04)
+        ) #smaller red label
+    WarningLabel.place(anchor = 'n', relx = HRel, rely = 0.09, relwidth = 1, relheight = 0.04) #placing the label
 
     MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
     MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.15, relwidth = 0.98, relheight = 0.7) #placing the textbox
@@ -138,17 +146,85 @@ def TKinterSetup():
             text = 'Create Memory',
             font = ('Courier', 20),
             command = lambda : Confirmation(InsertMemory, MemoryInput.get(1.0))
-        )
-    Submit.place(anchor = 'n', relx = HRel, rely = 0.8635, relwidth = 0.9)
+        ) #sbmition button to insert new memory
+    Submit.place(anchor = 'n', relx = HRel, rely = 0.8635, relwidth = 0.9) #placing the button
 
-    Back = Button(InputFrame, text = 'Back to menu', font = ('Courier', 10), command = lambda : Raise(MenuFrame))
-    Back.place(anchor = 'n', relx = HRel, rely = 0.945, relwidth = 0.9)
+    BackInput = Button\
+        (
+            InputFrame,
+            text = 'Back to menu',
+            font = ('Courier', 10),
+            command = lambda : Raise(MenuFrame)
+        ) #return at menu button
+    BackInput.place(anchor = 'n', relx = HRel, rely = 0.945, relwidth = 0.9) #placing the button
 
-    MenuFrame.tkraise()
+    ###########################################################################################################memmories
 
+    MemoOpts =\
+        [
+            [True, False], #random order, last year only
+            [False, False], #chronological order, last year only
+            [True, True], #random order, all years
+            [False, False] ##chronological order, all years
+        ] #parameters for a specific query of the database
+
+    ViewFrame = Frame(Root) #memory view root frame
+    ViewFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 1)  #placing the frame in the window
+
+    TopViewFrame = Frame(ViewFrame) #frame for top label and search bar
+    TopViewFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 0.2) #placing the frame top
+
+    ListCanvas = Canvas(ViewFrame) #canvas for memories in database
+    ListCanvas.place(relx = 0, rely = 0.2, relwidth = 1, relheight = 0.745) #placing the frame under the top frame
+
+    BottomViewFrame = Frame(ViewFrame) #frame for back to menu
+    BottomViewFrame.place(relx = 0, rely = 0.945, relwidth = 1, relheight = 0.1) #placing the frame at the bottom
+
+    MemoriesLabel = Label\
+        (
+            TopViewFrame,
+            text = 'Your Memories:',
+            font = ('Courier', 32),
+        ) #top label in top frame
+    MemoriesLabel.place(anchor = 'n', relx = HRel, relwidth = 1, relheight = 0.7) #placing the label
+
+    SearchBar = TextBox(TopViewFrame, font = ('Courier', 16)) #search bar to search keywords in memories text
+    SearchBar.place(anchor = 'n', relx = HRel, rely = 0.7, relwidth = 0.99, relheight = 0.2) #placing the searchbar TODO
+
+    SearchButton = Button\
+        (
+            TopViewFrame,
+            text = 'Search',
+            font = ('Courier', 14),
+            command = lambda : None
+        ) #botton to research
+    SearchButton.place(anchor = 'n', relx = 0.86, rely = 0.7225, relwidth = 0.25, relheight = 0.17) #placingthe button
+
+    Sbar = Bar(ListCanvas, command = ListCanvas.yview)  #lateral bar to scroll through memories
+    ListCanvas.configure(yscrollcommand = Sbar.set) #setting the canvas height like the scrollbar height
+    Sbar.pack(side='right', fill='y')  #placing the bar snapping it to right filling the entire height
+
+    BackView = Button\
+        (
+            BottomViewFrame,
+            text='Back to menu',
+            font=('Courier', 10),
+            command=lambda: Raise(MenuFrame)
+        )  #return at menu button
+    BackView.place(anchor = 'n', relx = HRel, rely = 0.05, relwidth = 0.9)  #placing the button
+
+    MemoriesData = ShowMemories(MemoOpts[Sel][0], MemoOpts[Sel][0]) #memories gaining from the db based on user options
+    Memories = []
+
+    for Data in MemoriesData:
+        DataFrame = Frame(ListCanvas, bg = '#b88b60')
+        #TODO continue from here
+
+
+    Raise(MenuFrame) #raising the menu as first viewed frame
     return Root
 
-## Start sql implementation
+## Start SQl implementation
 
 Connector = Connect("Memories.db", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
@@ -215,15 +291,7 @@ def ShowMemories(Random = True, All = False): #this function show the memories s
     if Random:  #shuffle the memory order if the user want to
         Mix(Memories)  #mix the memories
 
-    print("Memories:")
-    print()
-
-    for Memory in Memories:#loop to print all memories
-        print(Memory[0])
-        print(Memory[1])
-        print()
-
-    ReturnMenuSQL()
+    return Memories
 
 def ReturnMenuSQL(): #this function check if return to the menu (SQL)
     while True:
