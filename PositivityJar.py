@@ -7,9 +7,9 @@ from sqlite3 import connect as Connect
 from sqlite3 import PARSE_DECLTYPES as TimeStamps
 from string import ascii_uppercase as Alphabet
 from tkinter import Button as Button
-from tkinter import Canvas as Canvas
 from tkinter import Frame as Frame
 from tkinter import Label as Label
+from tkinter import Listbox as ListBox
 from tkinter import messagebox as MSGBox
 from tkinter import PhotoImage as Photo
 from tkinter import Scrollbar as Bar
@@ -66,7 +66,7 @@ def TKinterSetup():
     MenuTopLabel = Label(MenuFrame, text = 'Welcome to\nPositivity.Jar', font = ('Courier', 32), bd = 10) #welcome label
     MenuTopLabel.place(anchor = 'n', relx = HRel, rely = 0.015, relwidth = 1, relheight = 0.2) #placing the label
 
-    Sel = 0
+
 
     def ButtonSelection(Selection = int()):
         nonlocal Sel
@@ -140,6 +140,7 @@ def TKinterSetup():
     MemoryInput = TextBox(InputFrame, font = ('Courier', 16)) #text box for memory insertion
     MemoryInput.place(anchor = 'n', relx = HRel, rely = 0.15, relwidth = 0.98, relheight = 0.7) #placing the textbox
 
+
     Submit = Button\
         (
             InputFrame,
@@ -154,8 +155,8 @@ def TKinterSetup():
             InputFrame,
             text = 'Back to menu',
             font = ('Courier', 10),
-            command = lambda : Raise(MenuFrame)
-        ) #return at menu button
+            command = lambda : [MemoryInput.delete(1.0, 'end'), Raise(MenuFrame)]
+        ) #return at menu button and clean the text box
     BackInput.place(anchor = 'n', relx = HRel, rely = 0.945, relwidth = 0.9) #placing the button
 
     ###########################################################################################################memmories
@@ -168,14 +169,18 @@ def TKinterSetup():
             [False, False] ##chronological order, all years
         ] #parameters for a specific query of the database
 
+    MemoriesDB = lambda x: ShowMemories(MemoOpts[x][0], MemoOpts[x][1])  # memories of the db based on user options
+    Sel = int()
+    Memories = MemoriesDB(Sel)
+
     ViewFrame = Frame(Root) #memory view root frame
     ViewFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 1)  #placing the frame in the window
 
     TopViewFrame = Frame(ViewFrame) #frame for top label and search bar
     TopViewFrame.place(relx = 0, rely = 0, relwidth = 1, relheight = 0.2) #placing the frame top
 
-    ListCanvas = Canvas(ViewFrame) #canvas for memories in database
-    ListCanvas.place(relx = 0, rely = 0.2, relwidth = 1, relheight = 0.745) #placing the frame under the top frame
+    ListFrame = Frame(ViewFrame) #canvas for memories in database
+    ListFrame.place(relx = 0, rely = 0.2, relwidth = 1, relheight = 0.745) #placing the frame under the top frame
 
     BottomViewFrame = Frame(ViewFrame) #frame for back to menu
     BottomViewFrame.place(relx = 0, rely = 0.945, relwidth = 1, relheight = 0.1) #placing the frame at the bottom
@@ -200,26 +205,25 @@ def TKinterSetup():
         ) #botton to research
     SearchButton.place(anchor = 'n', relx = 0.86, rely = 0.7225, relwidth = 0.25, relheight = 0.17) #placingthe button
 
-    Sbar = Bar(ListCanvas, command = ListCanvas.yview)  #lateral bar to scroll through memories
-    ListCanvas.configure(yscrollcommand = Sbar.set) #setting the canvas height like the scrollbar height
-    Sbar.pack(side='right', fill='y')  #placing the bar snapping it to right filling the entire height
-
+    SBar = Bar(ListFrame, orient = 'vertical')
+    ListMemoryBox = ListBox\
+        (
+            ListFrame,
+            selectmode = 'browse',
+            bg = '#5f00f1',
+            activestyle = 'none',
+            font = ('Courier', 14),
+        )
+    # ListMemoryBox.config()
+    ListMemoryBox.place(anchor = 'n', relx = HRel, rely = 0, relwidth = 0.99, relheight = 1)
     BackView = Button\
         (
             BottomViewFrame,
-            text='Back to menu',
-            font=('Courier', 10),
-            command=lambda: Raise(MenuFrame)
+            text = 'Back to menu',
+            font = ('Courier', 10),
+            command = lambda: Raise(MenuFrame)
         )  #return at menu button
     BackView.place(anchor = 'n', relx = HRel, rely = 0.05, relwidth = 0.9)  #placing the button
-
-    MemoriesData = ShowMemories(MemoOpts[Sel][0], MemoOpts[Sel][0]) #memories gaining from the db based on user options
-    Memories = []
-
-    for Data in MemoriesData:
-        DataFrame = Frame(ListCanvas, bg = '#b88b60')
-        #TODO continue from here
-
 
     Raise(MenuFrame) #raising the menu as first viewed frame
     return Root
@@ -290,6 +294,9 @@ def ShowMemories(Random = True, All = False): #this function show the memories s
 
     if Random:  #shuffle the memory order if the user want to
         Mix(Memories)  #mix the memories
+
+    # for i in Memories:
+    #     print(i)
 
     return Memories
 
