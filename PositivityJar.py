@@ -214,7 +214,6 @@ def TKinterSetup():
             activestyle = 'none',
             font = ('Courier', 14),
         )
-    # ListMemoryBox.config()
     ListMemoryBox.place(anchor = 'n', relx = HRel, rely = 0, relwidth = 0.99, relheight = 1)
     BackView = Button\
         (
