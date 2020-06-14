@@ -23,7 +23,27 @@ def Clear(): #this function clear the console
     else: #is a unix based system
         _ = Sys('clear')
 
-## Start GUI implementation
+################################################################################################Start GUI implementation
+
+HRel = 0.5 #relative max size halved
+
+def EnvSetup():
+    Root = Tk()  # ambient
+    WIDTH = 400  # window width
+    HEIGHT = 720  # window height
+    SWIDTH = Root.winfo_screenwidth()  # screen width
+    SHEIGHT = Root.winfo_screenheight()  # screen height
+    X = (SWIDTH - WIDTH) / 2
+    Y = (SHEIGHT - HEIGHT) / 2
+    Dim = str(str(WIDTH) + 'x' + str(HEIGHT))  # string of sizes
+    Pos = str('+' + str(int(X)) + '+' + str(int(Y)))  # coordinates of upper left corner
+    Title = 'Positivity.Jar'
+    Icon = Photo(file='textures\icon.png')  # program icon
+    #Root.iconphoto(True, Icon)  # setting the icon
+    Root.title(Title)  # setting the title
+    Root.geometry(Dim + Pos)  # setting dimensions
+
+    return Root
 
 def Confirmation(Function , *args , Text = str(), Other = None, **aargs): #this function pops up a message for 2 actions
     Confirm = MSGBox.askquestion('Confirmation', Text) #messagebox yes/no
@@ -42,21 +62,7 @@ def Raise(Screen): #this function raise the selected frame to the top
     Screen.tkraise()
 
 def TKinterSetup():
-    Root = Tk() #ambient
-    HRel = 0.5 #relative max size halved
-    WIDTH = 400  #window width
-    HEIGHT = 720 #window height
-    SWIDTH = Root.winfo_screenwidth() #screen width
-    SHEIGHT = Root.winfo_screenheight() #screen height
-    X = (SWIDTH - WIDTH) / 2
-    Y = (SHEIGHT - HEIGHT) / 2
-    Dim = str(str(WIDTH) + 'x' + str(HEIGHT)) #string of sizes
-    Pos = str('+' + str(int(X)) + '+' + str(int(Y)))
-    Title = 'Positivity.Jar'
-    Icon = Photo(file='textures\icon.png') #program icon
-    Root.iconphoto(True, Icon) #setting the icon
-    Root.title(Title) #setting the title
-    Root.geometry(Dim + Pos) #setting dimensions
+    Root = EnvSetup()
 
     ################################################################################################################menu
 
@@ -65,7 +71,6 @@ def TKinterSetup():
 
     MenuTopLabel = Label(MenuFrame, text = 'Welcome to\nPositivity.Jar', font = ('Courier', 32), bd = 10) #welcome label
     MenuTopLabel.place(anchor = 'n', relx = HRel, rely = 0.015, relwidth = 1, relheight = 0.2) #placing the label
-
 
 
     def ButtonSelection(Selection = int()):
@@ -86,28 +91,28 @@ def TKinterSetup():
                 MenuFrame,
                 text = 'Show all memories of this year\n(random order)',
                 font = ('Courier', 14),
-                command = lambda : [Raise(ViewFrame), ButtonSelection(0)]
+                command = lambda : [ButtonSelection(0), Raise(ViewFrame)]
             ),
             Button
             (
                 MenuFrame,
                 text = 'Show all memories of this year\n(chronological order)',
                 font=('Courier', 14),
-                command = lambda : [Raise(ViewFrame), ButtonSelection(1)]
+                command = lambda : [ButtonSelection(1), Raise(ViewFrame)]
             ),
             Button
             (
                 MenuFrame,
                 text = "See all the memories of all year\n(random order)",
                 font=('Courier', 14),
-                command = lambda : [Raise(ViewFrame), ButtonSelection(2)]
+                command = lambda : [ButtonSelection(2), Raise(ViewFrame)]
             ),
             Button
             (
                 MenuFrame,
-                text = "See all the memories of all year\n(chronological order)",
+                text = 'See all the memories of all year\n(chronological order)',
                 font = ('Courier', 14),
-                command = lambda: [Raise(ViewFrame), ButtonSelection(3)]
+                command = lambda: [ButtonSelection(3), Raise(ViewFrame)]
             )
         ] #list of buttons of the menu
 
@@ -146,8 +151,8 @@ def TKinterSetup():
             InputFrame,
             text = 'Create Memory',
             font = ('Courier', 20),
-            command = lambda : Confirmation(InsertMemory, MemoryInput.get(1.0))
-        ) #sbmition button to insert new memory
+            command = lambda : Confirmation(InsertMemory, MemoryInput.get(1.0), Text = 'Are you sure?')
+        ) #submition button to insert new memory
     Submit.place(anchor = 'n', relx = HRel, rely = 0.8635, relwidth = 0.9) #placing the button
 
     BackInput = Button\
@@ -210,11 +215,16 @@ def TKinterSetup():
         (
             ListFrame,
             selectmode = 'browse',
-            bg = '#5f00f1',
+            bg = '#ffffff',
             activestyle = 'none',
             font = ('Courier', 14),
+            selectbackground = '#e0e0e0'
         )
     ListMemoryBox.place(anchor = 'n', relx = HRel, rely = 0, relwidth = 0.99, relheight = 1)
+
+    for i in ['a' for i in range(255)]:
+        ListMemoryBox.insert('end', i)
+
     BackView = Button\
         (
             BottomViewFrame,
@@ -227,7 +237,15 @@ def TKinterSetup():
     Raise(MenuFrame) #raising the menu as first viewed frame
     return Root
 
-## Start SQl implementation
+pass
+
+def GUIMenu(Root = Tk()):
+    MenuFrame = Frame(Root)
+    TopText = 'Welcome to\nPositivity.Jar'
+    MenuTopLabel= Label(MenuFrame, text = TopText, font = ('Courier', 32), bd = 10) #welcome label
+
+##################################################################################################End GUI implementation
+################################################################################################Start SQl implementation
 
 Connector = Connect("Memories.db", detect_types = TimeStamps)
 SQLShell = Connector.cursor()
@@ -267,8 +285,6 @@ def InsertMemory(Text = str()): #this function create a new memory inside the ta
     except Exception as Error:
         print(Error)
 
-    ReturnMenuSQL()
-
 def ShowMemories(Random = True, All = False): #this function show the memories selected
     YearsQuery = SQLTables + " AND name LIKE '%Memories'" #SQLQuery to find the name of all tables of memories
     Memories = [] #list of all selected memories
@@ -299,56 +315,9 @@ def ShowMemories(Random = True, All = False): #this function show the memories s
 
     return Memories
 
-def ReturnMenuSQL(): #this function check if return to the menu (SQL)
-    while True:
-        Pick = input("Do you want to return to the menu ?<y/n> ")
-
-        if Pick[0].lower() == "y":
-            Clear()
-            MainSQL()
-
-        elif Pick[0].lower() == "n":
-            Clear()
-            quit()
-
-        else:
-            print("Option not valid")
-
-        Clear()
-
-def MainSQL():
-    Clear()
-    YearTable()
-    Title = "Positivity.Jar" #program title
-    Welcome = "Welcome to Positivity.Jar, a place to store everything that make you happy during the year" #description
-    Menu = \
-        {
-            "Create a new positive memory": "InsertMemory()",
-            "See all the positive memories for this year (random order)": "ShowMemories()",
-            "See all the positive memories for this year (chronological order)": "ShowMemories(False)",
-            "See all the positive memories of all year (random order)": "ShowMemories(True, True)",
-            "See all the positive memories of all year (chronological order)": "ShowMemories(False, True)",
-            "Quit the program": "quit()"
-        } #menu options
-    Answer = - 1
-
-    while not 1 <= Answer <= len(Menu.keys()):  # check if the user input is acceptable
-        print(Welcome)
-        print()
-
-        for Key in Menu.keys():  # for loop  for every option
-            print(str(list(Menu.keys()).index(Key) + 1) + ")", Key)
-
-        print()
-        Answer = int(input("type the number matched with the option you want to select: "))  # ask for user input
-        Clear()
-
-
-    eval(list(Menu.values())[Answer - 1])  # transform the string in the corresponding function
-    input("Press any key to continue")
-
-##end sql implementation
+##################################################################################################end sql implementation
 
 if __name__ == "__main__": #launch of the program (directly)
-    ROOT = TKinterSetup()
+    ROOT = EnvSetup()
+    GUIMenu()
     ROOT.mainloop()
