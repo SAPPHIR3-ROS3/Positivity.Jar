@@ -252,7 +252,7 @@ SQLShell = Connector.cursor()
 SQLTables = "SELECT name FROM sqlite_master WHERE type = 'table'"
 
 def YearTable(): #this function declares a table of the current year inside  the database if non-existent
-    with Connector: #database as  context manager
+    with Connector: #database as context manager
         Table = "My" + str(Time.now().year) + "Memories" #table name
         DB = SQLShell.execute(SQLTables).fetchall()
         DataBase = [str(Tab[0]) for Tab in DB] #getting names of al tables
@@ -305,19 +305,17 @@ def ShowMemories(Random = True, All = False): #this function show the memories s
             if len(Memories) == 0:
                 MemoryQuery = "SELECT Memory, Date FROM " + Years[-2]  #query for memories of the previous year
                 YearMemories = SQLShell.execute(MemoryQuery).fetchall()  # getting all memories from the selected year
-                Memories = [[Data[0], Data[1]] for Data in YearMemories]  # formatting properly the data
+                Memories = [[Data[0], str(Data[1])] for Data in YearMemories]  # formatting properly the data
 
     if Random:  #shuffle the memory order if the user want to
         Mix(Memories)  #mix the memories
 
-    # for i in Memories:
-    #     print(i)
+    for i in Memories:
+        print(i[1])
 
     return Memories
 
 ##################################################################################################end sql implementation
 
 if __name__ == "__main__": #launch of the program (directly)
-    ROOT = EnvSetup()
-    GUIMenu()
-    ROOT.mainloop()
+    ShowMemories()
